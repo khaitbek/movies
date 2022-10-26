@@ -23,6 +23,7 @@ renderMovies(movies.slice(0, 100))
 // functions
 function renderMovies(movies){
     movies.forEach((movie) => {
+        moviesList.innerHTML = ""
         // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
         const movieClone = movieTemplate.cloneNode(true)
         movieClone.querySelector("#movieTitle").textContent = movie.fulltitle
@@ -50,7 +51,7 @@ function debounce(cb, delay = 1000){
 function filterMovies(movies, queryString){
     // const filteredMovies = movies.filter(movie => movie.fulltitle.toLowerCase().contains(queryString.toLowerCase()))
     // renderMovies(filteredMovies)
-    movies.forEach(movie => {
-        console.log(movie.fulltitle);
-    })
+    const filteredMovies = movies.filter(movie => movie.fulltitle.toLowerCase().includes(queryString.toLowerCase()))
+    console.log(filteredMovies);
+    renderMovies(filteredMovies)
 }
