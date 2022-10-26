@@ -8,3 +8,12 @@ body{
     max-width: 700px;
     width: 90%;
 }
+
+#movieDialog{
+    max-width: 90%;
+    margin-inline: auto;
+}
+
+iframe{
+    max-width: 100%;
+}

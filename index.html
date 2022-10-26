@@ -28,41 +28,81 @@
             </form>
 
 
-            <ul class="movies-list list-unstyled" id="moviesList">
+            <ul class="movies-list row list-unstyled" id="moviesList">
 
             </ul>
         </div>
     </section>
 
-    <template id="movieTemplate">
-        <li class="movie-item  p-3 mb-3 bg-dark text-bg-dark rounded-2" id="movieItem">
-            <h3 class="mb-4" id="movieTitle">
-
-            </h3>
-
-            <img class="mb-3 img-fluid movie-img" id="movieImg" width="300" height="300"
-                src="https://via.placeholder.com/300" alt="">
-
-            <div class="movie-info mb-4">
-                <p class="text-primary me-3">
-                    Published year:
-                    <span class="d-inline-block px-1 text-bg-primary rounded-1" id="movieYear"></span>
-                </p>
-
-                <p class="text-primary">
-                    Language:
-                    <span class="text-bg-primary p-1 rounded-1" id="movieLang"></span>
-                </p>
+    <!-- modal -->
+    <dialog class="bg-dark" id="movieDialog">
+        <div class="row">
+            <div class="col-5">
+                <iframe id="dialogFrame" width="904" height="509" src="https://www.youtube.com/embed/5YTX-0qukpA" title="FIDE World Fischer Random Championship | Day 2 | Peter Leko & Nils Grandelius" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
+            <div class="col-7 position-relative d-flex flex-column justify-content-between">
+                <div>
+                    <h3 class="mb-4 text-white" id="dialogTitle">
+                        Forrest Gump
+                    </h3>
+                    <div class="movie-info d-flex align-items-center gap-3 mb-4">
+                        <p class="text-primary me-3">
+                            Published year:
+                            <span class="d-inline-block px-1 text-bg-primary rounded-1" id="dialogYear">2012</span>
+                        </p>
+        
+                        <p class="text-primary">
+                            <a class="text-decoration-none" href="https://imdb.com">IMDB:</a>
+                            <span class="p-1 text-bg-warning rounded-1" id="dialogRating">8.8</span>
+                        </p>
+        
+                        <p class="text-white">
+                            <time id="dialogRuntime">2 hours, 2 minutes</time>
+                        </p>
+                    </div>
+                    <p class="text-white" id="dialogSummary">
+                         ipsum dolor sit amet consectetur adipisicing elit. Cupiditate, consequuntur. Architecto suscipit minima sLoremapiente dicta perferendis accusantium sint alias totam!
+                    </p>
+                </div>
 
-            <p class="p-2 text-bg-primary rounded-3" id="movieCategory"></p>
+                <a class="link-primary" id="dialogLink" target="blank" href="#">Show on IMDB</a>
 
-            <p id="movieDescription"></p>
+                <button class="position-absolute top-0 end-0 btn btn-danger" id="dialogClose" class="btn btn-danger">X</button>
+            </div>
+        </div>
+    </dialog>
+    <!-- template -->
+    <template id="movieTemplate">
+        <li class="movie-item col-12 col-lg-6   mb-3 rounded-2" id="movieItem">
+            <div class="p-3 bg-dark text-bg-dark rounded-2">
+                <h3 class="mb-4" id="movieTitle">
 
-            <p class="text-primary">
-                <a class="text-decoration-none" href="https://imdb.com">IMDB:</a>
-                <span class="p-1 text-bg-warning rounded-1" id="movieRating"></span>
-            </p>
+                </h3>
+    
+                <img class="mb-3 img-fluid movie-img" id="movieImg" width="300" height="300"
+                    src="https://via.placeholder.com/300" alt="">
+    
+                <div class="movie-info d-flex align-items-center gap-3 mb-4">
+                    <p class="text-primary me-3">
+                        Published year:
+                        <span class="d-inline-block px-1 text-bg-primary rounded-1" id="movieYear"></span>
+                    </p>
+    
+                    <p class="text-primary">
+                        <a class="text-decoration-none" href="https://imdb.com">IMDB:</a>
+                        <span class="p-1 text-bg-warning rounded-1" id="movieRating"></span>
+                    </p>
+    
+                    <p>
+                        <time id="movieRuntime"></time>
+                    </p>
+                </div>
+    
+                <p class="p-2 rounded-3" id="movieCategory"></p>
+                <button class="d-block w-100 btn btn-primary" id="movieBtn">
+                    See more
+                </button> 
+            </div>           
 
         </li>
     </template>
