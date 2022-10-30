@@ -33,12 +33,12 @@ moviesList.addEventListener("click",(evt)=>{
 movieForm.addEventListener("submit",(evt)=>{
     evt.preventDefault()
     // updateDebounceText(movieInput.value)
-    filterMoviesByCategory(movies,movieSelect.value)
+    filterMoviesByCategory(movies,movieSelect.value,movieInput.value)
 })
 
 // function expressions
 const updateDebounceText = debounce((text) => {
-    filterMovies(movies,text)
+    filterMovies(movies,text,movieSelect.value)
 })
 
 // function calls
@@ -115,13 +115,21 @@ function debounce(cb, delay = 1000){
     }
 }
 
-function filterMovies(movies, queryString){
+function filterMovies(movies, queryString, category = ""){
+    if(category){
+        return filterMoviesByCategory(movies,category,queryString)
+    }
     const filteredMovies = movies.filter(movie => movie.Title.toString().match(new RegExp(queryString,'gi')))
     renderMovies(filteredMovies)
 }
 
-function filterMoviesByCategory(allMovies,category){
-    console.log(category);
+function filterMoviesByCategory(allMovies,category,searchValue = ""){
+    
+    if(searchValue){
+        const searchPattern = new RegExp(searchValue,"gi");
+        const filteredMovies = movies.filter(movie => movie.Title.toString().match(searchPattern))
+        return renderMovies(filteredMovies)
+    };
     if(category === "all") return renderMovies(allMovies);
     renderMovies(movies.filter(movie => movie.Categories.includes(category)))
 }
