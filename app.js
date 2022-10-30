@@ -4,12 +4,12 @@ const movieTemplate = document.querySelector("#movieTemplate").content
 const movieForm = document.querySelector("#movieForm")
 const movieInput = document.querySelector("#movieSearch")
 const movieDialog = document.querySelector("#movieDialog")
+const movieSelect = document.querySelector("#movieSelect")
 const dialogCloseBtn = movieDialog.querySelector("#dialogClose")
 const dialogFrame = movieDialog.querySelector("#dialogFrame")
 
 // fragment
 const movieFragment = new DocumentFragment()
-
 // events
 movieInput.addEventListener("input",(evt)=>{
     updateDebounceText(evt.target.value)
@@ -30,13 +30,20 @@ moviesList.addEventListener("click",(evt)=>{
     }
 })
 
+movieForm.addEventListener("submit",(evt)=>{
+    evt.preventDefault()
+    // updateDebounceText(movieInput.value)
+    filterMoviesByCategory(movies,movieSelect.value)
+})
+
 // function expressions
 const updateDebounceText = debounce((text) => {
     filterMovies(movies,text)
 })
 
 // function calls
-renderMovies(movies.slice(0, 100))
+renderMovies(movies.slice(0,100))
+getOptions(movies)
 
 // functions
 function renderDialog(movie){
@@ -50,6 +57,8 @@ function renderDialog(movie){
 }
 
 function renderMovies(movies){
+    console.log(movies);
+    moviesList.innerHTML = ""
     movies.forEach((movie) => {
         moviesList.innerHTML = ""
         // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
@@ -70,6 +79,28 @@ function renderMovies(movies){
 
 }
 
+function getOptions(movies){
+    const categories = []
+    for(let i = movies.length - 1; i >= 0; i--){
+        for(let j = 0; j < movies[i].Categories.split("|").length; j++){
+            if(!categories.includes(movies[i].Categories.split("|")[j])){
+                categories.push(movies[i].Categories.split("|")[j])
+            }
+        }
+    }
+    renderOptions(categories)
+    
+}
+
+function renderOptions(options){
+    options.forEach(option => {
+        const newOption = document.createElement("option");
+        newOption.value = option
+        newOption.textContent = option
+        movieSelect.appendChild(newOption)
+    })
+}
+
 function getDuration(duration){
     return `${Math.floor(duration / 60)} hours, ${duration % 60} minutes`
 }
@@ -83,7 +114,14 @@ function debounce(cb, delay = 1000){
         },delay)
     }
 }
+
 function filterMovies(movies, queryString){
-    const filteredMovies = movies.filter(movie => movie.fulltitle.toLowerCase().includes(queryString.toLowerCase()))
+    const filteredMovies = movies.filter(movie => movie.Title.toString().match(new RegExp(queryString,'gi')))
     renderMovies(filteredMovies)
+}
+
+function filterMoviesByCategory(allMovies,category){
+    console.log(category);
+    if(category === "all") return renderMovies(allMovies);
+    renderMovies(movies.filter(movie => movie.Categories.includes(category)))
 }

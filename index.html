@@ -22,14 +22,44 @@
 
             <form class="movies-form mb-5" id="movieForm" autocomplete="off">
                 <div class="input-group">
-                    <input class="form-control" name="user_search" id="movieSearch" type="enter your search" placeholder="search" minlength="1" required>
+                    <input class="form-control" name="user_search" id="movieSearch" type="enter your search" placeholder="search">
+                    <select class="form-select" name="user_select" id="movieSelect">
+                        <option value="all">All</option>
+                    </select>
                     <button class="btn btn-primary" id="searchBtn">Search</button>
                 </div>
             </form>
 
 
             <ul class="movies-list row list-unstyled" id="moviesList">
+                <li class="skeleton-item mb-3 me-2 py-2 px-3 rounded-2">
+                    <img class="skeleton-img mb-3 rounded-2" src="https://via.placeholder.com/300" alt="template image">
 
+                    <h3 class="mb-3 text-white text-center rounded-1 p-2 bg-secondary"></h3>
+
+                    <p class="p-5 rounded-2 bg-secondary"></p>
+                </li>
+                <li class="skeleton-item mb-3 me-2 py-2 px-3 rounded-2">
+                    <img class="skeleton-img mb-3 rounded-2" src="https://via.placeholder.com/300" alt="template image">
+
+                    <h3 class="mb-3 text-white text-center rounded-1 p-2 bg-secondary"></h3>
+
+                    <p class="p-5 rounded-2 bg-secondary"></p>
+                </li>
+                <li class="skeleton-item mb-3 me-2 py-2 px-3 rounded-2">
+                    <img class="skeleton-img mb-3 rounded-2" src="https://via.placeholder.com/300" alt="template image">
+
+                    <h3 class="mb-3 text-white text-center rounded-1 p-2 bg-secondary"></h3>
+
+                    <p class="p-5 rounded-2 bg-secondary"></p>
+                </li>
+                <li class="skeleton-item mb-3 me-2 py-2 px-3 rounded-2">
+                    <img class="skeleton-img mb-3 rounded-2" src="https://via.placeholder.com/300" alt="template image">
+
+                    <h3 class="mb-3 text-white text-center rounded-1 p-2 bg-secondary"></h3>
+
+                    <p class="p-5 rounded-2 bg-secondary"></p>
+                </li>
             </ul>
         </div>
     </section>

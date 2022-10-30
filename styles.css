@@ -17,3 +17,27 @@ body{
 iframe{
     max-width: 100%;
 }
+
+.skeleton-item{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 350px;
+    border: 2px solid gray;
+}
+
+.skeleton-img{
+    width: 300px !important;
+    height: 300px !important;
+    background-color: gray;
+    animation: skeleton 1s ease-in-out forwards infinite;
+}
+
+@keyframes skeleton{
+    0%{
+        opacity: 0.5;
+    }
+    100%{
+        opacity: 1;
+    }
+}
