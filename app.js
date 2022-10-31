@@ -2,7 +2,9 @@
 const moviesList = document.querySelector("#moviesList")
 const movieTemplate = document.querySelector("#movieTemplate").content
 const movieForm = document.querySelector("#movieForm")
-const movieInput = document.querySelector("#movieSearch")
+const movieInput = movieForm.querySelector("#movieSearch")
+const userFromYear = movieForm.querySelector("#userFromYear")
+const userToYear = movieForm.querySelector("#userToYear")
 const movieDialog = document.querySelector("#movieDialog")
 const movieSelect = document.querySelector("#movieSelect")
 const dialogCloseBtn = movieDialog.querySelector("#dialogClose")
@@ -25,52 +27,53 @@ moviesList.addEventListener("click",(evt)=>{
     const target = evt.target;
     if(target.matches("#movieBtn")){
         const id = target.dataset.id;
-        const foundObject = movies.find(movie => movie.ytid == id)
+        const foundObject = movies.find(movie => movie.youtube_id == id)
         renderDialog(foundObject)
     }
 })
 
 movieForm.addEventListener("submit",(evt)=>{
     evt.preventDefault()
-    // updateDebounceText(movieInput.value)
-    filterMoviesByCategory(movies,movieSelect.value,movieInput.value)
+    updateDebounceText(movieInput.value)
+    
 })
 
 // function expressions
 const updateDebounceText = debounce((text) => {
-    filterMovies(movies,text,movieSelect.value)
+    filterMovies(movies,text,movieSelect.value,{from:userFromYear.value,to:userToYear.value})
 })
 
 // function calls
 renderMovies(movies.slice(0,100))
 getOptions(movies)
+initialize_years()
 
 // functions
 function renderDialog(movie){
-    movieDialog.querySelector("#dialogTitle").textContent = movie.fulltitle
-    movieDialog.querySelector("#dialogYear").textContent = movie.movie_year
+    movieDialog.querySelector("#dialogFrame").src = movie.iframe
+    movieDialog.querySelector("#dialogTitle").textContent = movie.full_title
+    movieDialog.querySelector("#dialogYear").textContent = movie.year
     movieDialog.querySelector("#dialogRating").textContent = movie.imdb_rating
     movieDialog.querySelector("#dialogRuntime").textContent = getDuration(movie.runtime)
     movieDialog.querySelector("#dialogSummary").textContent = movie.summary
-    movieDialog.querySelector("#dialogLink").href = `https://imdb.com/title/${movie.imdb_id}`
+    movieDialog.querySelector("#dialogLink").href = movie.imdb_link
     movieDialog.showModal()
 }
 
 function renderMovies(movies){
-    console.log(movies);
     moviesList.innerHTML = ""
     movies.forEach((movie) => {
         moviesList.innerHTML = ""
         // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
         const movieClone = movieTemplate.cloneNode(true)
-        movieClone.querySelector("#movieTitle").textContent = movie.fulltitle
-        movieClone.querySelector("#movieImg").src = `http://i3.ytimg.com/vi/${movie.ytid}/mqdefault.jpg`
+        movieClone.querySelector("#movieTitle").textContent = movie.full_title
+        movieClone.querySelector("#movieImg").src = movie.img.mediumResolution
         // movieClone.querySelector("#movieImg").src = movie.ImageURL
-        movieClone.querySelector("#movieYear").textContent = movie.movie_year
-        movieClone.querySelector("#movieCategory").textContent = movie.Categories.split("|").join(" | ")
+        movieClone.querySelector("#movieYear").textContent = movie.year
+        movieClone.querySelector("#movieCategory").textContent = movie.categories.join(", ")
         movieClone.querySelector("#movieRuntime").textContent = getDuration(movie.runtime)
         movieClone.querySelector("#movieRating").textContent = movie.imdb_rating
-        movieClone.querySelector("#movieBtn").dataset.id = movie.ytid
+        movieClone.querySelector("#movieBtn").dataset.id = movie.youtube_id
         // append the cloned template to the fragment
         movieFragment.appendChild(movieClone)
     });
@@ -82,9 +85,9 @@ function renderMovies(movies){
 function getOptions(movies){
     const categories = []
     for(let i = movies.length - 1; i >= 0; i--){
-        for(let j = 0; j < movies[i].Categories.split("|").length; j++){
-            if(!categories.includes(movies[i].Categories.split("|")[j])){
-                categories.push(movies[i].Categories.split("|")[j])
+        for(let j = 0; j < movies[i].categories.length; j++){
+            if(!categories.includes(movies[i].categories[j])){
+                categories.push(movies[i].categories[j])
             }
         }
     }
@@ -115,21 +118,39 @@ function debounce(cb, delay = 1000){
     }
 }
 
-function filterMovies(movies, queryString, category = ""){
-    if(category){
-        return filterMoviesByCategory(movies,category,queryString)
-    }
-    const filteredMovies = movies.filter(movie => movie.Title.toString().match(new RegExp(queryString,'gi')))
-    renderMovies(filteredMovies)
+function initialize_years(){
+    userFromYear.value = getSmallestYear(movies)
+    userToYear.value = getBiggestYear(movies)
+
+    
+    userFromYear.min = getSmallestYear(movies)
+    userFromYear.max = Number(userToYear.value) - 1
+    userToYear.min = Number(userFromYear.value) + 1
+    userToYear.max = getBiggestYear(movies)
 }
 
-function filterMoviesByCategory(allMovies,category,searchValue = ""){
-    
-    if(searchValue){
-        const searchPattern = new RegExp(searchValue,"gi");
-        const filteredMovies = movies.filter(movie => movie.Title.toString().match(searchPattern))
+function filterMovies(movies, queryString, category = "all",fromTo = {from:1960,to:new Date().getFullYear()}){
+    if(category === "all"){
+        const filteredMovies = movies.filter(movie => movie.title.match(new RegExp(queryString,'gi')) && movie.year >= fromTo.from && movie.year <= fromTo.to)
         return renderMovies(filteredMovies)
-    };
-    if(category === "all") return renderMovies(allMovies);
-    renderMovies(movies.filter(movie => movie.Categories.includes(category)))
+    }
+    const filteredMoviesByCategory = movies.filter(movie => movie.title.match(new RegExp(queryString,'gi')) && movie.categories.includes(category) && movie.year >= fromTo.from && movie.year <= fromTo.to)
+    return renderMovies(filteredMoviesByCategory)
+}
+
+function getBiggestYear(movies){
+    let biggestYear = null
+    movies.forEach(movie => {
+        if(movie.year >= biggestYear) biggestYear = movie.year
+    })
+    return biggestYear
+}
+
+function getSmallestYear(movies){
+    let smallestYear = movies[0].year
+    movies.forEach(movie => {
+        if(movie.year < smallestYear) smallestYear = movie.year
+    })
+    console.log(smallestYear);
+    return smallestYear
 }
