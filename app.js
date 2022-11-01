@@ -9,47 +9,49 @@ const movieDialog = document.querySelector("#movieDialog")
 const movieSelect = document.querySelector("#movieSelect")
 const dialogCloseBtn = movieDialog.querySelector("#dialogClose")
 const dialogFrame = movieDialog.querySelector("#dialogFrame")
+const userCharacterSort = movieForm.querySelector("#userCharacterSort")
+
 
 // fragment
 const movieFragment = new DocumentFragment()
 // events
-movieInput.addEventListener("input",(evt)=>{
+movieInput.addEventListener("input", (evt) => {
     updateDebounceText(evt.target.value)
 })
 
-dialogCloseBtn.addEventListener("click",()=>{
+dialogCloseBtn.addEventListener("click", () => {
     dialogFrame.src = ""
     movieDialog.close()
 
 })
 
-moviesList.addEventListener("click",(evt)=>{
+moviesList.addEventListener("click", (evt) => {
     const target = evt.target;
-    if(target.matches("#movieBtn")){
+    if (target.matches("#movieBtn")) {
         const id = target.dataset.id;
         const foundObject = movies.find(movie => movie.youtube_id == id)
         renderDialog(foundObject)
     }
 })
 
-movieForm.addEventListener("submit",(evt)=>{
+movieForm.addEventListener("submit", (evt) => {
     evt.preventDefault()
     updateDebounceText(movieInput.value)
-    
+
 })
 
 // function expressions
 const updateDebounceText = debounce((text) => {
-    filterMovies(movies,text,movieSelect.value,{from:userFromYear.value,to:userToYear.value})
+    filterMovies(movies, text, movieSelect.value, { from: userFromYear.value, to: userToYear.value }, userCharacterSort.value)
 })
 
 // function calls
-renderMovies(movies.slice(0,100))
+renderMovies(movies.slice(0, 100))
 getOptions(movies)
 initialize_years()
 
 // functions
-function renderDialog(movie){
+function renderDialog(movie) {
     movieDialog.querySelector("#dialogFrame").src = movie.iframe
     movieDialog.querySelector("#dialogTitle").textContent = movie.full_title
     movieDialog.querySelector("#dialogYear").textContent = movie.year
@@ -60,7 +62,7 @@ function renderDialog(movie){
     movieDialog.showModal()
 }
 
-function renderMovies(movies){
+function renderMovies(movies) {
     moviesList.innerHTML = ""
     movies.forEach((movie) => {
         moviesList.innerHTML = ""
@@ -82,20 +84,20 @@ function renderMovies(movies){
 
 }
 
-function getOptions(movies){
+function getOptions(movies) {
     const categories = []
-    for(let i = movies.length - 1; i >= 0; i--){
-        for(let j = 0; j < movies[i].categories.length; j++){
-            if(!categories.includes(movies[i].categories[j])){
+    for (let i = movies.length - 1; i >= 0; i--) {
+        for (let j = 0; j < movies[i].categories.length; j++) {
+            if (!categories.includes(movies[i].categories[j])) {
                 categories.push(movies[i].categories[j])
             }
         }
     }
     renderOptions(categories)
-    
+
 }
 
-function renderOptions(options){
+function renderOptions(options) {
     options.forEach(option => {
         const newOption = document.createElement("option");
         newOption.value = option
@@ -103,54 +105,70 @@ function renderOptions(options){
         movieSelect.appendChild(newOption)
     })
 }
-
-function getDuration(duration){
+66
+function getDuration(duration) {
     return `${Math.floor(duration / 60)} hours, ${duration % 60} minutes`
 }
 
-function debounce(cb, delay = 1000){
+function debounce(cb, delay = 1000) {
     let timeout
     return (...args) => {
         clearTimeout(timeout)
-        timeout = setTimeout(()=>{
+        timeout = setTimeout(() => {
             cb(...args)
-        },delay)
+        }, delay)
     }
 }
 
-function initialize_years(){
+function initialize_years() {
     userFromYear.value = getSmallestYear(movies)
     userToYear.value = getBiggestYear(movies)
 
-    
+
     userFromYear.min = getSmallestYear(movies)
     userFromYear.max = Number(userToYear.value) - 1
     userToYear.min = Number(userFromYear.value) + 1
     userToYear.max = getBiggestYear(movies)
 }
 
-function filterMovies(movies, queryString, category = "all",fromTo = {from:1960,to:new Date().getFullYear()}){
-    if(category === "all"){
-        const filteredMovies = movies.filter(movie => movie.title.match(new RegExp(queryString,'gi')) && movie.year >= fromTo.from && movie.year <= fromTo.to)
-        return renderMovies(filteredMovies)
+function filterMovies(movies, queryString, category = "all", fromTo = { from: 1960, to: new Date().getFullYear() }, sort_type = "") {
+    if (category === "all") {
+        const filteredMovies = movies.filter(movie => movie.title.match(new RegExp(queryString, 'gi')) && movie.year >= fromTo.from && movie.year <= fromTo.to)
+        const sortedMovies = sortMovies(filteredMovies, sort_type)
+        console.log(sortedMovies);
+        return renderMovies(sortedMovies)
     }
-    const filteredMoviesByCategory = movies.filter(movie => movie.title.match(new RegExp(queryString,'gi')) && movie.categories.includes(category) && movie.year >= fromTo.from && movie.year <= fromTo.to)
-    return renderMovies(filteredMoviesByCategory)
+    const filteredMoviesByCategory = movies.filter(movie => movie.title.match(new RegExp(queryString, 'gi')) && movie.categories.includes(category) && movie.year >= fromTo.from && movie.year <= fromTo.to)
+    const sortedMovies = sortMovies(filteredMoviesByCategory, sort_type)
+    return renderMovies(sortedMovies)
 }
 
-function getBiggestYear(movies){
+function getBiggestYear(movies) {
     let biggestYear = null
     movies.forEach(movie => {
-        if(movie.year >= biggestYear) biggestYear = movie.year
+        if (movie.year >= biggestYear) biggestYear = movie.year
     })
     return biggestYear
 }
 
-function getSmallestYear(movies){
+function getSmallestYear(movies) {
     let smallestYear = movies[0].year
     movies.forEach(movie => {
-        if(movie.year < smallestYear) smallestYear = movie.year
+        if (movie.year < smallestYear) smallestYear = movie.year
     })
     console.log(smallestYear);
     return smallestYear
+}
+
+function sortMovies(movies, type = undefined) {
+    console.log(type);
+    const sortedMovies = movies.sort((movie1, movie2) => {
+        if(type === "a-z") return movie1.title.toLowerCase()[0].charCodeAt(0) - movie2.title.toLowerCase()[0].charCodeAt(0)
+        if(type === "z-a") return movie2.title.toLowerCase()[0].charCodeAt(0) - movie1.title.toLowerCase()[0].charCodeAt(0)
+        if(type === "oldest-latest") return movie1.year - movie2.year
+        if(type === "latest-oldest") return movie2.year - movie1.year
+        if(type === "low-high") return movie1.imdb_rating - movie2.imdb_rating
+        return movie2.imdb_rating - movie1.imdb_rating
+    })
+    return sortedMovies
 }
