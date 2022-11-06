@@ -1,6 +1,8 @@
 // get elements from the DOM
 const moviesList = document.querySelector("#moviesList")
 const movieTemplate = document.querySelector("#movieTemplate").content
+const savedMovieTemplate = document.querySelector("#savedMovieTemplate").content
+const savedMoviesList = document.querySelector("#savedMoviesList")
 const movieForm = document.querySelector("#movieForm")
 const movieInput = movieForm.querySelector("#movieSearch")
 const userFromYear = movieForm.querySelector("#userFromYear")
@@ -30,11 +32,6 @@ dialogCloseBtn.addEventListener("click", () => {
 
 })
 
-savedMoviesBtn.addEventListener("click",()=>{
-    const savedMovies = getSavedMovies()
-    renderMovies(savedMovies)
-})
-
 moviesList.addEventListener("click", (evt) => {
     const target = evt.target;
     if (target.matches("#movieBtn")) {
@@ -60,8 +57,9 @@ const updateDebounceText = debounce((text) => {
 })
 
 // function calls
-renderMovies(movies.slice(0, 100))
+renderMovies(movies.slice(0, 100),moviesList)
 getOptions(movies)
+renderSavedMovies(savedMovies,savedMoviesList)
 initialize_years()
 
 // functions
@@ -76,10 +74,9 @@ function renderDialog(movie) {
     movieDialog.showModal()
 }
 
-function renderMovies(movies) {
-    moviesList.innerHTML = ""
+function renderMovies(movies,list) {
+    list.innerHTML = ""
     movies.forEach((movie,index) => {
-        moviesList.innerHTML = ""
         // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
         const movieClone = movieTemplate.cloneNode(true)
         movieClone.querySelector("#movieTitle").textContent = movie.full_title
@@ -94,8 +91,29 @@ function renderMovies(movies) {
         movieFragment.appendChild(movieClone)
     });
     // append the fragment to the list
-    moviesList.appendChild(movieFragment)
+    list.appendChild(movieFragment)
 
+}
+
+function renderSavedMovies(movies,list){
+    const savedMoviesFragment = new DocumentFragment()
+    list.innerHTML = ""
+    movies.forEach((movie,index) => {
+        // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
+        const movieClone = savedMovieTemplate.cloneNode(true)
+        movieClone.querySelector("#savedMovieTitle").textContent = movie.full_title
+        movieClone.querySelector("#savedMovieImg").src = movie.img.mediumResolution
+        movieClone.querySelector("#savedMovieYear").textContent = movie.year
+        movieClone.querySelector("#savedMovieCategory").textContent = movie.categories.join(", ")
+        movieClone.querySelector("#savedMovieRuntime").textContent = getDuration(movie.runtime)
+        movieClone.querySelector("#savedMovieRating").textContent = movie.imdb_rating
+        movieClone.querySelector("#savedMovieBtn").dataset.id = movie.youtube_id
+        movieClone.querySelector("#deleteSavedBtn").dataset.id = index
+        // append the cloned template to the fragment
+        savedMoviesFragment.appendChild(movieClone)
+    });
+    // append the fragment to the list
+    list.appendChild(savedMoviesFragment)
 }
 
 function getOptions(movies) {
@@ -153,7 +171,7 @@ function filterMovies(movies, queryString, category, period, sortType) {
         return isFiltered
     })
     const sortedMovies = sortMovies(filteredMovies,sortType);
-    renderMovies(sortedMovies)
+    renderMovies(sortedMovies,moviesList)
 }
 
 function getBiggestYear(movies) {
@@ -197,19 +215,18 @@ function saveMovie(movie){
     }
     savedMovies.push(movie);
     localStorage.setItem("savedMovies",JSON.stringify(savedMovies))
+    renderSavedMovies(savedMovies,savedMoviesList)
 }
 
 function checkIfMovieIsSaved(movie){
     const isMovieSaved = savedMovies.findIndex(savedMovie => {
-        console.log(savedMovie, movie);
         return savedMovie.youtube_id === movie.youtube_id
     })
-    console.log(isMovieSaved);
     return isMovieSaved
 }
 
 function deleteSavedMovie(index){
     savedMovies.splice(index,1);
     localStorage.setItem("savedMovies",JSON.stringify(savedMovies))
-    // renderMovies(savedMovies);
+    renderSavedMovies(savedMovies,savedMoviesList);
 }
