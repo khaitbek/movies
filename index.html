@@ -42,6 +42,7 @@
                         <option value="low-high">Low - high rated</option>
                         <option value="high-low">High low rated</option>
                     </select>
+                    <button class="btn btn-success" id="savedMoviesBtn" type="button">Saved</button>
 
                 </div>
                 <button class="btn btn-primary" id="searchBtn">Search</button>
@@ -150,9 +151,14 @@
                 </div>
 
                 <p class="p-2 rounded-3" id="movieCategory"></p>
-                <button class="d-block w-100 btn btn-primary" id="movieBtn">
-                    See more
-                </button>
+                <div class="d-flex">
+                    <button class="d-block w-100 me-2 btn btn-primary" id="movieBtn">
+                        See more
+                    </button>
+                    <button class="btn btn-danger" id="saveBtn" type="button">
+                        <img aria-hidden="true" src="./images/bookmark.png" width="32" height="32" alt="" style="pointer-events: none;">
+                    </button>
+                </div>
             </div>
 
         </li>

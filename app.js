@@ -10,10 +10,15 @@ const movieSelect = document.querySelector("#movieSelect")
 const dialogCloseBtn = movieDialog.querySelector("#dialogClose")
 const dialogFrame = movieDialog.querySelector("#dialogFrame")
 const userCharacterSort = movieForm.querySelector("#userCharacterSort")
+const savedMoviesBtn = movieForm.querySelector("#savedMoviesBtn");
 
 
 // fragment
 const movieFragment = new DocumentFragment()
+
+// watchlist array
+const savedMovies = JSON.parse(localStorage.getItem("savedMovies")) || []
+
 // events
 movieInput.addEventListener("input", (evt) => {
     updateDebounceText(evt.target.value)
@@ -25,12 +30,21 @@ dialogCloseBtn.addEventListener("click", () => {
 
 })
 
+savedMoviesBtn.addEventListener("click",()=>{
+    const savedMovies = getSavedMovies()
+    renderMovies(savedMovies)
+})
+
 moviesList.addEventListener("click", (evt) => {
     const target = evt.target;
     if (target.matches("#movieBtn")) {
         const id = target.dataset.id;
         const foundObject = movies.find(movie => movie.youtube_id == id)
-        renderDialog(foundObject)
+        return renderDialog(foundObject)
+    }
+    if(target.matches("#saveBtn")){
+        const foundMovie = movies[Number(target.dataset.id)]
+        saveMovie(foundMovie)
     }
 })
 
@@ -42,7 +56,7 @@ movieForm.addEventListener("submit", (evt) => {
 
 // function expressions
 const updateDebounceText = debounce((text) => {
-    filterMovies(movies, text, movieSelect.value, { from: userFromYear.value, to: userToYear.value }, userCharacterSort.value)
+    filterMovies(movies, text, movieSelect.value, { from: userFromYear.valueAsNumber, to: userToYear.valueAsNumber }, userCharacterSort.value)
 })
 
 // function calls
@@ -64,18 +78,18 @@ function renderDialog(movie) {
 
 function renderMovies(movies) {
     moviesList.innerHTML = ""
-    movies.forEach((movie) => {
+    movies.forEach((movie,index) => {
         moviesList.innerHTML = ""
         // if the index is 100 which means we've loaded 100 movies we can just stop the loop 'cause we dont need to loop through every single movie
         const movieClone = movieTemplate.cloneNode(true)
         movieClone.querySelector("#movieTitle").textContent = movie.full_title
         movieClone.querySelector("#movieImg").src = movie.img.mediumResolution
-        // movieClone.querySelector("#movieImg").src = movie.ImageURL
         movieClone.querySelector("#movieYear").textContent = movie.year
         movieClone.querySelector("#movieCategory").textContent = movie.categories.join(", ")
         movieClone.querySelector("#movieRuntime").textContent = getDuration(movie.runtime)
         movieClone.querySelector("#movieRating").textContent = movie.imdb_rating
         movieClone.querySelector("#movieBtn").dataset.id = movie.youtube_id
+        movieClone.querySelector("#saveBtn").dataset.id = index
         // append the cloned template to the fragment
         movieFragment.appendChild(movieClone)
     });
@@ -105,9 +119,11 @@ function renderOptions(options) {
         movieSelect.appendChild(newOption)
     })
 }
-66
+
 function getDuration(duration) {
-    return `${Math.floor(duration / 60)} hours, ${duration % 60} minutes`
+    const hours = Math.floor(duration / 60)
+    const minutes = duration % 60
+    return `${hours} hours, ${minutes} minutes`
 }
 
 function debounce(cb, delay = 1000) {
@@ -131,16 +147,13 @@ function initialize_years() {
     userToYear.max = getBiggestYear(movies)
 }
 
-function filterMovies(movies, queryString, category = "all", fromTo = { from: 1960, to: new Date().getFullYear() }, sort_type = "") {
-    if (category === "all") {
-        const filteredMovies = movies.filter(movie => movie.title.match(new RegExp(queryString, 'gi')) && movie.year >= fromTo.from && movie.year <= fromTo.to)
-        const sortedMovies = sortMovies(filteredMovies, sort_type)
-        console.log(sortedMovies);
-        return renderMovies(sortedMovies)
-    }
-    const filteredMoviesByCategory = movies.filter(movie => movie.title.match(new RegExp(queryString, 'gi')) && movie.categories.includes(category) && movie.year >= fromTo.from && movie.year <= fromTo.to)
-    const sortedMovies = sortMovies(filteredMoviesByCategory, sort_type)
-    return renderMovies(sortedMovies)
+function filterMovies(movies, queryString, category, period, sortType) {
+    const filteredMovies  = movies.filter(movie => {
+        const isFiltered = movie.title.match(new RegExp(queryString,"gi")) && (category === "all" || movie.categories.includes(category)) && movie.year >= period?.from && movie.year <= period?.to
+        return isFiltered
+    })
+    const sortedMovies = sortMovies(filteredMovies,sortType);
+    renderMovies(sortedMovies)
 }
 
 function getBiggestYear(movies) {
@@ -160,8 +173,8 @@ function getSmallestYear(movies) {
     return smallestYear
 }
 
-function sortMovies(movies, type = undefined) {
-    console.log(type);
+function sortMovies(movies, type) {
+    if(type == "") return movies;
     const sortedMovies = movies.sort((movie1, movie2) => {
         if(type === "a-z") return movie1.title.toLowerCase()[0].charCodeAt(0) - movie2.title.toLowerCase()[0].charCodeAt(0)
         if(type === "z-a") return movie2.title.toLowerCase()[0].charCodeAt(0) - movie1.title.toLowerCase()[0].charCodeAt(0)
@@ -171,4 +184,32 @@ function sortMovies(movies, type = undefined) {
         return movie2.imdb_rating - movie1.imdb_rating
     })
     return sortedMovies
+}
+
+function getSavedMovies(){
+    return JSON.parse(localStorage.getItem("savedMovies")) || []
+}
+
+function saveMovie(movie){
+    const isSaved = checkIfMovieIsSaved(movie)
+    if(isSaved > -1){
+        return deleteSavedMovie(isSaved)
+    }
+    savedMovies.push(movie);
+    localStorage.setItem("savedMovies",JSON.stringify(savedMovies))
+}
+
+function checkIfMovieIsSaved(movie){
+    const isMovieSaved = savedMovies.findIndex(savedMovie => {
+        console.log(savedMovie, movie);
+        return savedMovie.youtube_id === movie.youtube_id
+    })
+    console.log(isMovieSaved);
+    return isMovieSaved
+}
+
+function deleteSavedMovie(index){
+    savedMovies.splice(index,1);
+    localStorage.setItem("savedMovies",JSON.stringify(savedMovies))
+    // renderMovies(savedMovies);
 }

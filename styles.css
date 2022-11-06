@@ -26,11 +26,14 @@ iframe{
     border: 2px solid gray;
 }
 
+.skeleton-item * {
+    animation: skeleton 1s ease-in-out forwards infinite;
+}
+
 .skeleton-img{
     width: 300px !important;
     height: 300px !important;
     background-color: gray;
-    animation: skeleton 1s ease-in-out forwards infinite;
 }
 
 .movies-form{
